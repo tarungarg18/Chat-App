@@ -11,60 +11,70 @@ export default function ChatContainer({ currentChat, socket }) {
   const scrollRef = useRef();
   const [arrivalMessage, setArrivalMessage] = useState(null);
 
-  useEffect(async () => {
-    const data = await JSON.parse(
-      localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
-    );
-    const response = await axios.post(recieveMessageRoute, {
-      from: data._id,
-      to: currentChat._id,
-    });
-    setMessages(response.data);
-  }, [currentChat]);
-
+  // Fetch messages when currentChat changes
   useEffect(() => {
-    const getCurrentChat = async () => {
-      if (currentChat) {
-        await JSON.parse(
-          localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
-        )._id;
-      }
+    const fetchMessages = async () => {
+      if (!currentChat) return;
+      const data = JSON.parse(
+        localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
+      );
+      const response = await axios.post(recieveMessageRoute, {
+        from: data._id,
+        to: currentChat._id,
+      });
+
+      // Add timestamp for existing messages
+      const messagesWithTime = response.data.map(msg => ({
+        ...msg,
+        time: new Date(msg.updatedAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }));
+
+      setMessages(messagesWithTime);
     };
-    getCurrentChat();
+    fetchMessages();
   }, [currentChat]);
 
+  // Handle sending message
   const handleSendMsg = async (msg) => {
-    const data = await JSON.parse(
+    const data = JSON.parse(
       localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
     );
+
+    const now = new Date();
+    const formattedTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
     socket.current.emit("send-msg", {
       to: currentChat._id,
       from: data._id,
       msg,
     });
+
     await axios.post(sendMessageRoute, {
       from: data._id,
       to: currentChat._id,
       message: msg,
     });
 
-    const msgs = [...messages];
-    msgs.push({ fromSelf: true, message: msg });
-    setMessages(msgs);
+    setMessages((prev) => [...prev, { fromSelf: true, message: msg, time: formattedTime }]);
   };
 
+  // Listen for incoming messages
   useEffect(() => {
     if (socket.current) {
       socket.current.on("msg-recieve", (msg) => {
-        setArrivalMessage({ fromSelf: false, message: msg });
+        const now = new Date();
+        const formattedTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        setArrivalMessage({ fromSelf: false, message: msg, time: formattedTime });
       });
     }
   }, []);
 
+  // Add arrived message to chat
   useEffect(() => {
-    arrivalMessage && setMessages((prev) => [...prev, arrivalMessage]);
+    if (arrivalMessage) setMessages((prev) => [...prev, arrivalMessage]);
   }, [arrivalMessage]);
 
+  // Scroll to latest message
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -76,7 +86,7 @@ export default function ChatContainer({ currentChat, socket }) {
           <div className="avatar">
             <img
               src={`data:image/svg+xml;base64,${currentChat.avatarImage}`}
-              alt=""
+              alt="avatar"
             />
           </div>
           <div className="username">
@@ -85,23 +95,20 @@ export default function ChatContainer({ currentChat, socket }) {
         </div>
         <Logout />
       </div>
+
       <div className="chat-messages">
-        {messages.map((message) => {
-          return (
-            <div ref={scrollRef} key={uuidv4()}>
-              <div
-                className={`message ${
-                  message.fromSelf ? "sended" : "recieved"
-                }`}
-              >
-                <div className="content ">
-                  <p>{message.message}</p>
-                </div>
+        {messages.map((message) => (
+          <div ref={scrollRef} key={uuidv4()}>
+            <div className={`message ${message.fromSelf ? "sended" : "recieved"}`}>
+              <div className="content">
+                <p>{message.message}</p>
+                <span className="time">{message.time}</span>
               </div>
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
+
       <ChatInput handleSendMsg={handleSendMsg} />
     </Container>
   );
@@ -112,69 +119,95 @@ const Container = styled.div`
   grid-template-rows: 10% 80% 10%;
   gap: 0.1rem;
   overflow: hidden;
+  background-color: #1e1e2f;
+
   @media screen and (min-width: 720px) and (max-width: 1080px) {
     grid-template-rows: 15% 70% 15%;
   }
+
   .chat-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 2rem;
+    background-color: #0d0d1a;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+
     .user-details {
       display: flex;
       align-items: center;
       gap: 1rem;
-      .avatar {
-        img {
-          height: 3rem;
-        }
+
+      .avatar img {
+        height: 3rem;
+        border-radius: 50%;
+        border: 2px solid #4f04ff;
       }
-      .username {
-        h3 {
-          color: white;
-        }
+
+      .username h3 {
+        color: #ffffff;
+        font-weight: 500;
       }
     }
   }
+
   .chat-messages {
     padding: 1rem 2rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    overflow: auto;
+    gap: 0.8rem;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+
     &::-webkit-scrollbar {
       width: 0.2rem;
       &-thumb {
-        background-color: #ffffff39;
-        width: 0.1rem;
+        background-color: #4f04ff88;
         border-radius: 1rem;
       }
     }
+
     .message {
       display: flex;
       align-items: center;
+
       .content {
-        max-width: 40%;
-        overflow-wrap: break-word;
-        padding: 1rem;
+        max-width: 45%;
+        padding: 0.9rem 1rem;
         font-size: 1.1rem;
         border-radius: 1rem;
-        color: #d1d1d1;
-        @media screen and (min-width: 720px) and (max-width: 1080px) {
-          max-width: 70%;
-        }
+        color: #e0e0e0;
+        word-wrap: break-word;
+        background-color: #2b2b3a;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        transition: transform 0.2s;
+        position: relative;
+      }
+
+      .content:hover {
+        transform: scale(1.02);
+      }
+
+      .time {
+        display: block;
+        font-size: 0.7rem;
+        color: #b0b0b0;
+        text-align: right;
+        margin-top: 0.3rem;
       }
     }
+
     .sended {
       justify-content: flex-end;
       .content {
-        background-color: #4f04ff21;
+        background-color: #4f04ff44;
       }
     }
+
     .recieved {
       justify-content: flex-start;
       .content {
-        background-color: #9900ff20;
+        background-color: #9900ff44;
       }
     }
   }

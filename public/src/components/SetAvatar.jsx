@@ -27,12 +27,14 @@ export default function SetAvatar() {
     if (!user) navigate("/login");
   }, [navigate]);
 
-  const generateRandomName = () => Math.random().toString(36).substring(2, 10);
+  const generateRandomName = () =>
+    Math.random().toString(36).substring(2, 10);
 
+  // Generate 12 avatars
   useEffect(() => {
     const generateAvatars = () => {
       const data = [];
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 12; i++) {
         const randomName = generateRandomName();
         const svgCode = multiavatar(randomName);
         const encoded = btoa(unescape(encodeURIComponent(svgCode)));
@@ -41,7 +43,6 @@ export default function SetAvatar() {
       setAvatars(data);
       setIsLoading(false);
     };
-
     generateAvatars();
   }, []);
 
@@ -51,7 +52,7 @@ export default function SetAvatar() {
       return;
     }
 
-    const user = await JSON.parse(
+    const user = JSON.parse(
       localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
     );
 
@@ -83,13 +84,12 @@ export default function SetAvatar() {
           <div className="title-container">
             <h1>Pick an Avatar as your profile picture</h1>
           </div>
+
           <div className="avatars">
             {avatars.map((avatar, index) => (
               <div
                 key={index}
-                className={`avatar ${
-                  selectedAvatar === index ? "selected" : ""
-                }`}
+                className={`avatar ${selectedAvatar === index ? "selected" : ""}`}
                 onClick={() => setSelectedAvatar(index)}
               >
                 <img
@@ -99,9 +99,11 @@ export default function SetAvatar() {
               </div>
             ))}
           </div>
+
           <button onClick={setProfilePicture} className="submit-btn">
             Set as Profile Picture
           </button>
+
           <ToastContainer />
         </Container>
       )}
@@ -114,7 +116,7 @@ const Container = styled.div`
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  gap: 3rem;
+  gap: 2rem;
   background-color: #131324;
   height: 100vh;
   width: 100vw;
@@ -123,15 +125,16 @@ const Container = styled.div`
     max-inline-size: 100%;
   }
 
-  .title-container {
-    h1 {
-      color: white;
-    }
+  .title-container h1 {
+    color: white;
+    text-align: center;
   }
 
   .avatars {
     display: flex;
-    gap: 2rem;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
 
     .avatar {
       border: 0.4rem solid transparent;
@@ -168,6 +171,7 @@ const Container = styled.div`
     border-radius: 0.4rem;
     font-size: 1rem;
     text-transform: uppercase;
+    transition: 0.3s ease;
 
     &:hover {
       background-color: #3c0edc;
