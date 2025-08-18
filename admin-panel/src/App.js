@@ -3,7 +3,6 @@ import axios from "axios";
 
 const BACKEND_URL = process.env.REACT_APP_API_URL || "https://chat-app-1-tpn3.onrender.com";
 const API = `${BACKEND_URL}/api/admin`;
-const ADMIN_KEY = process.env.REACT_APP_ADMIN_KEY || "dev-admin-key";
 
 function App() {
   const [users, setUsers] = useState([]);
@@ -12,10 +11,15 @@ function App() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API}/users`, { headers: { "x-admin-key": ADMIN_KEY } });
+      console.log("Fetching users from:", `${API}/users`);
+      
+      const res = await axios.get(`${API}/users`, { 
+        timeout: 10000
+      });
       setUsers(res.data);
+      console.log("Users fetched successfully:", res.data.length, "users");
     } catch (err) {
-      console.error(err);
+      console.error("Fetch users error:", err);
       alert("Error fetching users: " + err.message);
     } finally {
       setLoading(false);
@@ -26,7 +30,7 @@ function App() {
     if (window.confirm("⚠️ Delete ALL users? This cannot be undone.")) {
       try {
         setLoading(true);
-        const res = await axios.delete(`${API}/delete-all-users`, { headers: { "x-admin-key": ADMIN_KEY } });
+        const res = await axios.delete(`${API}/delete-all-users`);
         alert(`${res.data.msg} (${res.data.count} users deleted)`);
         fetchUsers();
       } catch (err) {
@@ -41,7 +45,7 @@ function App() {
     if (window.confirm(`⚠️ Delete user "${username}"? This cannot be undone.`)) {
       try {
         setLoading(true);
-        const res = await axios.delete(`${API}/delete-user/${userId}`, { headers: { "x-admin-key": ADMIN_KEY } });
+        const res = await axios.delete(`${API}/delete-user/${userId}`);
         alert(`✅ ${res.data.msg}`);
         fetchUsers(); // Refresh the user list
       } catch (err) {
@@ -56,7 +60,7 @@ function App() {
     if (window.confirm("⚠️ Delete ALL messages? This cannot be undone.")) {
       try {
         setLoading(true);
-        const res = await axios.delete(`${API}/delete-all-messages`, { headers: { "x-admin-key": ADMIN_KEY } });
+        const res = await axios.delete(`${API}/delete-all-messages`);
         alert(`${res.data.msg} (${res.data.count} messages deleted)`);
       } catch (err) {
         alert("Error: " + err.message);

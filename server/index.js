@@ -17,6 +17,7 @@ app.use(cors({
     "http://localhost:3000",  
     "http://localhost:3001",  
     "https://chat-app-frontend-kag8.onrender.com",
+    "https://admin-panel-67kf.onrender.com",
     process.env.ADMIN_FRONTEND_URL,
     process.env.FRONTEND_URL
   ].filter(Boolean),
@@ -28,6 +29,8 @@ app.use(express.json());
 
 app.use("/api/admin", adminRoutes);
 
+// For local development, use: mongodb://127.0.0.1:27017/chat-app
+// For production (Render), set MONGO_URL env var to your MongoDB Atlas connection string
 const MONGO_URL = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/chat-app";
 
 mongoose
@@ -65,6 +68,7 @@ const io = socket(server, {
       "http://localhost:3000",
       "http://localhost:3001",
       "https://chat-app-frontend-kag8.onrender.com",
+      "https://admin-panel-67kf.onrender.com",
       process.env.ADMIN_FRONTEND_URL,
       process.env.FRONTEND_URL
     ].filter(Boolean),

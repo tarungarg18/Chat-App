@@ -1,15 +1,5 @@
 const router = require("express").Router();
 
-function verifyAdminKey(req, res, next) {
-  const configuredKey = process.env.ADMIN_KEY || "dev-admin-key";
-  const providedKey = req.header("x-admin-key");
-  if (!providedKey || providedKey !== configuredKey) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  next();
-}
-
-router.use(verifyAdminKey);
 const User = require("../models/userModel");
 const Message = require("../models/messageModel");
 
