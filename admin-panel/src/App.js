@@ -3,11 +3,33 @@ import axios from "axios";
 
 const BACKEND_URL = process.env.REACT_APP_API_URL || "https://chat-app-1-tpn3.onrender.com";
 const API = `${BACKEND_URL}/api/admin`;
-const ADMIN_KEY = process.env.REACT_APP_ADMIN_KEY || "tarun0809";
+const ADMIN_KEY = process.env.REACT_APP_ADMIN_KEY || "dev-admin-key";
 
 function App() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState("Testing connection...");
+
+  // Test connection to backend
+  const testConnection = async () => {
+    try {
+      console.log("Testing connection to:", BACKEND_URL);
+      console.log("API base:", API);
+      console.log("Admin key:", ADMIN_KEY);
+      
+      const res = await axios.get(`${BACKEND_URL}/ping`);
+      setConnectionStatus(`✅ Backend connected: ${res.data.msg}`);
+      
+      // Test admin endpoint
+      const adminRes = await axios.get(`${API}/users`, { 
+        headers: { "x-admin-key": ADMIN_KEY } 
+      });
+      setConnectionStatus(`✅ Admin API working: ${adminRes.data.length} users found`);
+    } catch (err) {
+      console.error("Connection test failed:", err);
+      setConnectionStatus(`❌ Connection failed: ${err.message}`);
+    }
+  };
 
   const fetchUsers = async () => {
     try {
@@ -67,6 +89,7 @@ function App() {
   };
 
   useEffect(() => {
+    testConnection();
     fetchUsers();
   }, []);
 
@@ -75,6 +98,17 @@ function App() {
       <h1 style={{ color: "#333", borderBottom: "3px solid #007bff", paddingBottom: "10px" }}>
         ⚙️ Chat App Admin Panel
       </h1>
+
+      <div style={{ 
+        marginBottom: "1rem", 
+        padding: "10px", 
+        backgroundColor: connectionStatus.includes("✅") ? "#d4edda" : "#f8d7da",
+        border: `1px solid ${connectionStatus.includes("✅") ? "#c3e6cb" : "#f5c6cb"}`,
+        borderRadius: "5px",
+        color: connectionStatus.includes("✅") ? "#155724" : "#721c24"
+      }}>
+        <strong>Status:</strong> {connectionStatus}
+      </div>
 
       <div style={{ marginBottom: "2rem" }}>
         <button
@@ -125,6 +159,21 @@ function App() {
           }}
         >
           🔄 Refresh Users
+        </button>
+
+        <button
+          onClick={testConnection}
+          style={{ 
+            marginLeft: "10px",
+            padding: "12px 20px", 
+            background: "#17a2b8", 
+            color: "white", 
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer"
+          }}
+        >
+          🔍 Test Connection
         </button>
       </div>
 
