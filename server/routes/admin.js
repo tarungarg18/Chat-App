@@ -2,6 +2,17 @@ const router = require("express").Router();
 const User = require("../models/userModel");
 const Message = require("../models/messageModel");
 
+// GET /api/admin/users - Get all users
+router.get("/users", async (req, res) => {
+  try {
+    const users = await User.find({}, { password: 0 }); 
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/admin/delete-all-users - Delete all users
 router.delete("/delete-all-users", async (req, res) => {
   try {
     const result = await User.deleteMany({});
@@ -24,6 +35,7 @@ router.delete("/delete-all-users", async (req, res) => {
   }
 });
 
+// DELETE /api/admin/delete-user/:userId - Delete specific user
 router.delete("/delete-user/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
@@ -68,6 +80,7 @@ router.delete("/delete-user/:userId", async (req, res) => {
   }
 });
 
+// DELETE /api/admin/delete-all-messages - Delete all messages
 router.delete("/delete-all-messages", async (req, res) => {
   try {
     const result = await Message.deleteMany({});
@@ -76,15 +89,6 @@ router.delete("/delete-all-messages", async (req, res) => {
       io.emit("messagesCleared", { reason: "Admin cleared all messages" });
     }
     res.json({ msg: "All messages deleted", count: result.deletedCount });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-router.get("/users", async (_req, res) => {
-  try {
-    const users = await User.find({}, { password: 0 }); 
-    res.json(users);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
