@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import ChatInput from "./ChatInput";
-import Logout from "./Logout";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import { sendMessageRoute, recieveMessageRoute } from "../utils/APIRoutes";
@@ -58,16 +57,38 @@ export default function ChatContainer({ currentChat, socket }) {
     setMessages((prev) => [...prev, { fromSelf: true, message: msg, time: formattedTime }]);
   };
 
+  // Ensure sender also updates message list in case ack needed
+  useEffect(() => {
+    if (!socket.current) return;
+    const handleSent = ({ to, msg }) => {
+      // Only append if this chat is still active and the message belongs here
+      if (!currentChat || currentChat._id !== to) return;
+      const now = new Date();
+      const formattedTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      setMessages((prev) => [...prev, { fromSelf: true, message: msg, time: formattedTime }]);
+    };
+    socket.current.off("msg-sent");
+    socket.current.on("msg-sent", handleSent);
+    return () => {
+      socket.current.off("msg-sent", handleSent);
+    };
+  }, [socket, currentChat]);
+
   // Listen for incoming messages
   useEffect(() => {
-    if (socket.current) {
-      socket.current.on("msg-recieve", (msg) => {
-        const now = new Date();
-        const formattedTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        setArrivalMessage({ fromSelf: false, message: msg, time: formattedTime });
-      });
-    }
-  }, []);
+    if (!socket.current) return;
+    const handleReceive = (msg) => {
+      const now = new Date();
+      const formattedTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      setArrivalMessage({ fromSelf: false, message: msg, time: formattedTime });
+    };
+    // Ensure only a single listener is active
+    socket.current.off("msg-recieve");
+    socket.current.on("msg-recieve", handleReceive);
+    return () => {
+      socket.current.off("msg-recieve", handleReceive);
+    };
+  }, [socket, currentChat]);
 
   // Add arrived message to chat
   useEffect(() => {
@@ -93,7 +114,7 @@ export default function ChatContainer({ currentChat, socket }) {
             <h3>{currentChat.username}</h3>
           </div>
         </div>
-        <Logout />
+        {/* Removed logout/delete buttons */}
       </div>
 
       <div className="chat-messages">

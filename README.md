@@ -1,131 +1,175 @@
-# 💬 Chat-App
+# 💬 MyChat
 
 A full-stack real-time chat application built with Node.js, Express, MongoDB, Socket.io, and React.
-It supports authentication, avatars, and instant one-to-one messaging.
+It supports simple email/password auth, avatars, instant one-to-one messaging, and admin panel for user management.
 
 ## 🚀 Features
 
-🔐 User Authentication – Register, login, and delete accounts
+🔐 **User Authentication** – Register, login, and delete accounts
 
-🖼 Set Profile Avatar – Personalize your profile
+🖼 **Profile Avatar** – Personalize your profile with custom avatars
 
-👥 User List – See all registered users except yourself
+👥 **User Management** – See all registered users except yourself
 
-💬 Real-time Messaging – Powered by Socket.io
+💬 **Real-time Messaging** – Powered by Socket.io for instant communication
 
-📦 Persistent Chat Storage – Messages saved in MongoDB
+📦 **Persistent Storage** – Messages and user data saved in MongoDB
 
-📡 RESTful API – For authentication and messaging
+📡 **RESTful API** – For authentication and messaging
 
-🗑 Admin Option – Delete all users (for testing/dev cleanup)
+⚙️ **Admin Panel** – Delete individual users or all users, manage messages
+
+🔒 **Force Logout** – Automatic logout when users are deleted by admin
 
 ## 🛠 Tech Stack
 
-Frontend: React.js, Axios
+**Frontend:** React.js, Axios, Styled Components
 
-Backend: Node.js, Express.js, Socket.io
+**Backend:** Node.js, Express.js, Socket.io
 
-Database: MongoDB + Mongoose
+**Database:** MongoDB + Mongoose
 
-Other: dotenv, nodemon, cors
+**Authentication:** Simple local (email/password)
+
+**Other:** dotenv, nodemon, cors
 
 ## 📂 Project Structure
+```
 Chat-App/
-│── server/               # Backend
-│   ├── controllers/      # Business logic
-│   ├── models/           # Mongoose models (User, Message)
-│   ├── routes/           # Auth & Message routes
-│   ├── index.js          # Backend entry point
-│   ├── .env              # Environment variables
-│── public/src/           # Frontend React app
-│   ├── App.js
-│   ├── index.js
-│   ├── components/
-│── package.json
-│── README.md
+├── server/               # Backend server
+│   ├── config/          # (removed) Google OAuth configuration
+│   ├── controllers/     # Business logic
+│   ├── models/          # Mongoose models (User, Message)
+│   ├── routes/          # Auth, Message & Admin routes
+│   ├── services/        # (removed) Email service for OTP
+│   └── index.js         # Backend entry point
+├── public/              # Main chat app frontend
+│   └── src/
+│       ├── components/  # React components
+│       ├── pages/       # Main pages (Login, Chat, etc.)
+│       ├── assets/      # Images and static files
+│       └── utils/       # API routes and utilities
+├── admin-panel/         # Admin panel frontend
+│   └── src/             # React admin interface
+└── README.md
+```
 
 ## ⚙️ Installation & Setup
-1. Clone the repo
+
+### 1. Clone the repository
+```bash
 git clone https://github.com/tarungarg18/Chat-App.git
 cd Chat-App
+```
 
-2. Setup backend
+### 2. Setup Backend
+```bash
 cd server
 npm install
+```
 
-
-Create a .env file inside server/:
-
+Create a `.env` file inside `server/`:
+```env
 PORT=5000
 MONGO_URL=mongodb://127.0.0.1:27017/chatapp
-
+ADMIN_KEY=change_this_admin_key
+```
 
 Start the backend:
+```bash
+# for development with reload
+npm run dev
 
-nodemon index.js
+# for production
+npm start
+```
 
+Server will run at: `http://localhost:5000`
 
-Server will run at:
-
-http://localhost:5000
-
-3. Setup frontend
+### 3. Setup Main Chat App
+```bash
 cd ../public
 npm install
 npm start
+```
 
+Frontend will run at: `http://localhost:3000`
+To point to a hosted API, set an env var before build:
+```env
+REACT_APP_API_URL=https://your-api.example.com
+```
 
-Frontend will run at:
+### 4. Setup Admin Panel
+```bash
+cd ../admin-panel
+npm install
+npm start
+```
 
-http://localhost:3000
+Admin panel will run at: `http://localhost:3001`
+
+Create an `.env` file inside `admin-panel/`:
+```env
+REACT_APP_ADMIN_KEY=dev-admin-key
+```
+Use a stronger secret for production, and rebuild the admin panel after changes.
 
 ## 🔗 API Endpoints
-Authentication
 
-POST /api/auth/register → Register a new user
+### Authentication
+- `POST /api/auth/register` → Register a new user
+- `POST /api/auth/login` → Login
+- `POST /api/auth/send-verification` → Send email verification OTP
+- `POST /api/auth/verify-otp` → Verify email OTP
+- `POST /api/auth/setavatar/:id` → Set avatar
+- `DELETE /api/auth/delete/:id` → Delete user
 
-POST /api/auth/login → Login
+### Messaging
+- `POST /api/messages/addmsg` → Send message
+- `POST /api/messages/getmsg` → Fetch messages
 
-POST /api/auth/setavatar/:id → Set avatar
+### Admin (Protected with x-admin-key header)
+- `GET /api/admin/users` → Get all users
+- `DELETE /api/admin/delete-user/:userId` → Delete specific user
+- `DELETE /api/admin/delete-all-users` → Delete all users
+- `DELETE /api/admin/delete-all-messages` → Delete all messages
 
-DELETE /api/auth/delete/:id → Delete user
-
-Messaging
-
-POST /api/messages/addmsg → Send message
-
-POST /api/messages/getmsg → Fetch messages
-
-Utility
-
-GET /ping → Quick health check
+### Utility
+- `GET /ping` → Quick health check
 
 ## 📡 Socket.io Events
 
-add-user – Register user as online
+- `add-user` – Register user as online
+- `send-msg` – Send message to another user
+- `msg-recieve` – Receive message from another user
+- `forceLogout` – Force logout user (admin action)
 
-send-msg – Send message to another user
+## 🔐 Authentication Features
 
-msg-recieve – Receive message from another user
+- Simple local auth (email/password)
+- Automatic force logout when users are deleted
 
 ## 🧩 Development Tools
 
-Nodemon for auto-restart
-
-MongoDB Compass for DB management
-
-Postman for API testing
+- **Nodemon** for auto-restart
+- **MongoDB Compass** for DB management
+- **Postman** for API testing
 
 ## 🔮 Future Improvements
 
-Group chats
+- Group chats
+- Online/offline indicators
+- File & image sharing
+- Push notifications
+- Deployment on Render/Heroku + Netlify/Vercel
 
-Online/offline indicators
+## 📸 Screenshots
 
-File & image sharing
+![Login](images/login.png)
+![Register](images/register.png)
+![Chat](images/chat.png)
+![Admin](images/admin.png)
 
-Deployment on Render/Heroku + Netlify/Vercel
+## 📝 License
 
-## 👤 Author
-
-This project was created by Tarun Garg.
+MIT

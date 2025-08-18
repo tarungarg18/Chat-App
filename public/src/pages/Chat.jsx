@@ -36,11 +36,39 @@ export default function Chat() {
       socket.current = io(host);
       socket.current.emit("add-user", currentUser._id);
 
+      // Listen for force logout events (when user is deleted by admin)
+      socket.current.on("forceLogout", (data) => {
+        const reason = data?.reason || "You have been logged out";
+        alert(`🚨 ${reason}`);
+        localStorage.clear();
+        navigate("/login");
+      });
+
+      // Admin broadcast: a user was deleted
+      socket.current.on("userDeleted", ({ userId }) => {
+        // If current chat is the deleted user, close it
+        setContacts((prev) => prev.filter((u) => u._id !== userId));
+        setCurrentChat((prev) => (prev && prev._id === userId ? undefined : prev));
+      });
+
+      // Admin broadcast: all users deleted
+      socket.current.on("usersDeleted", () => {
+        setContacts([]);
+        setCurrentChat(undefined);
+        // If desired, force logout handled by backend for online users
+      });
+
+      // Admin broadcast: messages cleared
+      socket.current.on("messagesCleared", () => {
+        // No need to logout; just force refresh of current chat container by resetting it
+        setCurrentChat((prev) => (prev ? { ...prev } : prev));
+      });
+
       return () => {
         socket.current.disconnect();
       };
     }
-  }, [currentUser]);
+  }, [currentUser, navigate]);
 
   // Fetch contacts
   useEffect(() => {
@@ -61,11 +89,41 @@ export default function Chat() {
     setCurrentChat(chat);
   };
 
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to logout?")) {
+      localStorage.clear();
+      navigate("/login");
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (window.confirm("⚠️ Are you sure you want to delete your account? This action cannot be undone!")) {
+      try {
+        await axios.delete(`${host}/api/auth/delete/${currentUser._id}`);
+        alert("Account deleted successfully");
+        localStorage.clear();
+        navigate("/login");
+      } catch (error) {
+        alert("Error deleting account: " + error.message);
+      }
+    }
+  };
+
   return (
     <Container>
       <div className="header">
-        <img src={Logo} alt="MyChat Logo" />
-        <h1>MyChat</h1>
+        <div className="logo-section">
+          <img src={Logo} alt="MyChat Logo" />
+          <h1>MyChat</h1>
+        </div>
+        <div className="user-actions">
+          <button onClick={handleLogout} className="logout-btn">
+            🚪 Logout
+          </button>
+          <button onClick={handleDeleteAccount} className="delete-btn">
+            🗑️ Delete Account
+          </button>
+        </div>
       </div>
       <div className="container">
         <Contacts contacts={contacts} changeChat={handleChatChange} />
@@ -91,22 +149,63 @@ const Container = styled.div`
   .header {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    margin-top: 1rem;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 2rem;
+    background-color: #232323;
+    border-bottom: 1px solid #333;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 
-    img {
-      height: 4rem;
-      transition: transform 0.3s ease, filter 0.3s ease;
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      img {
+        height: 4rem;
+        transition: transform 0.3s ease, filter 0.3s ease;
+      }
+      img:hover {
+        transform: scale(1.2) rotate(10deg);
+        filter: brightness(1.2);
+        cursor: pointer;
+      }
+      h1 {
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
     }
-    img:hover {
-      transform: scale(1.2) rotate(10deg);
-      filter: brightness(1.2);
-      cursor: pointer;
-    }
-    h1 {
-      color: white;
-      text-transform: uppercase;
-      letter-spacing: 2px;
+
+    .user-actions {
+      display: flex;
+      gap: 1rem;
+
+      button {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
+
+      .logout-btn {
+        background-color: #ff4d4d;
+        color: white;
+      }
+      .logout-btn:hover {
+        background-color: #ff3333;
+      }
+
+      .delete-btn {
+        background-color: #ff9900;
+        color: white;
+      }
+      .delete-btn:hover {
+        background-color: #ff8800;
+      }
     }
   }
 

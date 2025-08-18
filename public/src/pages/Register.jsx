@@ -16,12 +16,14 @@ export default function Register() {
     draggable: true,
     theme: "dark",
   };
+  
   const [values, setValues] = useState({
     username: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
@@ -32,6 +34,8 @@ export default function Register() {
   const handleChange = (event) => {
     setValues({ ...values, [event.target.name]: event.target.value });
   };
+
+  // OTP flow removed; simple registration only
 
   const handleValidation = () => {
     const { password, confirmPassword, username, email } = values;
@@ -51,25 +55,34 @@ export default function Register() {
     return true;
   };
 
+  // OTP removed
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (handleValidation()) {
-      const { email, username, password } = values;
-      const { data } = await axios.post(registerRoute, {
-        username,
-        email,
-        password,
-      });
+      setLoading(true);
+      try {
+        const { data } = await axios.post(registerRoute, {
+          username: values.username,
+          email: values.email,
+          password: values.password
+        });
 
-      if (data.status === false) {
-        toast.error(data.msg, toastOptions);
-      }
-      if (data.status === true) {
-        localStorage.setItem(
-          process.env.REACT_APP_LOCALHOST_KEY,
-          JSON.stringify(data.user)
-        );
-        navigate("/");
+        if (data.status === false) {
+          toast.error(data.msg, toastOptions);
+        }
+        if (data.status === true) {
+          toast.success("Account created successfully! 🎉", toastOptions);
+          localStorage.setItem(
+            process.env.REACT_APP_LOCALHOST_KEY,
+            JSON.stringify(data.user)
+          );
+          navigate("/");
+        }
+      } catch (error) {
+        toast.error("Registration failed. Please try again.", toastOptions);
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -82,7 +95,9 @@ export default function Register() {
             <img src={Logo} alt="logo" />
             <h1>MyChat</h1>
           </div>
+          
           <p className="tagline">Create your account and start chatting 🎉</p>
+          
           <input
             type="text"
             placeholder="Username"
@@ -107,7 +122,11 @@ export default function Register() {
             name="confirmPassword"
             onChange={(e) => handleChange(e)}
           />
-          <button type="submit">Create Account</button>
+          {/* OTP removed */}
+          <button type="submit" disabled={loading}>
+            {loading ? "Creating Account..." : "Create Account"}
+          </button>
+          
           <span>
             Already have an account? <Link to="/login">Login</Link>
           </span>
@@ -204,6 +223,11 @@ const FormContainer = styled.div`
     &:hover {
       transform: translateY(-3px);
       background: linear-gradient(90deg, #997af0, #4e0eff);
+    }
+    &:disabled {
+      background: #555;
+      cursor: not-allowed;
+      color: #888;
     }
   }
 

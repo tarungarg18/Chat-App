@@ -1,5 +1,8 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
+// OTP and Google auth removed; keeping simple local auth only
+
+// Email OTP removed
 
 // Login user
 module.exports.login = async (req, res, next) => {
@@ -9,9 +12,30 @@ module.exports.login = async (req, res, next) => {
     if (!user)
       return res.json({ msg: "Incorrect Username or Password", status: false });
 
+    // Commented out Google OAuth check for now
+    /*
+    // Check if user is a Google OAuth user (no password required)
+    if (user.authMethod === 'google') {
+      return res.json({ msg: "This account was created with Google. Please use Google login.", status: false });
+    }
+    */
+
+    // For local users, verify password
+    if (!user.password) {
+      return res.json({ msg: "Incorrect Username or Password", status: false });
+    }
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid)
       return res.json({ msg: "Incorrect Username or Password", status: false });
+
+    // Commented out email verification check for now
+    /*
+    // Check if email is verified for local users
+    if (user.authMethod === 'local' && !user.isEmailVerified) {
+      return res.json({ msg: "Please verify your email before logging in", status: false });
+    }
+    */
 
     delete user.password;
     return res.json({ status: true, user });
@@ -38,7 +62,7 @@ module.exports.register = async (req, res, next) => {
     const user = await User.create({
       email,
       username,
-      password: hashedPassword,
+      password: hashedPassword
     });
 
     delete user.password;

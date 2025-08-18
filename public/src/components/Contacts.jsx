@@ -6,6 +6,7 @@ export default function Contacts({ contacts, changeChat }) {
   const [currentUserName, setCurrentUserName] = useState(undefined);
   const [currentUserImage, setCurrentUserImage] = useState(undefined);
   const [currentSelected, setCurrentSelected] = useState(undefined);
+  
   useEffect(async () => {
     const data = await JSON.parse(
       localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
@@ -13,10 +14,14 @@ export default function Contacts({ contacts, changeChat }) {
     setCurrentUserName(data.username);
     setCurrentUserImage(data.avatarImage);
   }, []);
+
   const changeCurrentChat = (index, contact) => {
     setCurrentSelected(index);
     changeChat(contact);
   };
+
+  // Logout button removed from sidebar
+
   return (
     <>
       {currentUserImage && currentUserImage && (
@@ -58,6 +63,7 @@ export default function Contacts({ contacts, changeChat }) {
             <div className="username">
               <h2>{currentUserName}</h2>
             </div>
+            {/* Logout button removed */}
           </div>
         </Container>
       )}
@@ -129,6 +135,9 @@ const Container = styled.div`
     justify-content: center;
     align-items: center;
     gap: 2rem;
+    flex-direction: column;
+    padding: 1rem;
+    
     .avatar {
       img {
         height: 4rem;
@@ -138,8 +147,25 @@ const Container = styled.div`
     .username {
       h2 {
         color: white;
+        margin: 0.5rem 0;
       }
     }
+    .logout-btn {
+      background-color: #ff4d4d;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      margin-top: 0.5rem;
+    }
+    .logout-btn:hover {
+      background-color: #ff3333;
+    }
+    
     @media screen and (min-width: 720px) and (max-width: 1080px) {
       gap: 0.5rem;
       .username {
@@ -150,3 +176,4 @@ const Container = styled.div`
     }
   }
 `;
+
