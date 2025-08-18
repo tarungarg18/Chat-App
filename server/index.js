@@ -10,20 +10,10 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Allowed origins (for both REST and WebSockets)
-const allowedOrigins = [
-  "http://localhost:3000",
-  "http://localhost:3001",
-  "https://chat-app-frontend-kag8.onrender.com",   // your frontend
-  "https://admin-panel-67kf.onrender.com",         // your admin panel
-  process.env.FRONTEND_URL,
-  process.env.ADMIN_FRONTEND_URL
-].filter(Boolean);
-
-// Middleware
+// Middleware - Allow all origins for admin panel access
 app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,
+  origin: "*",
+  credentials: false,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 }));
 app.use(express.json());
@@ -62,8 +52,8 @@ const server = app.listen(PORT, () =>
 
 const io = socket(server, {
   cors: {
-    origin: allowedOrigins,
-    credentials: true,
+    origin: "*",
+    credentials: false,
     methods: ["GET", "POST", "PUT", "DELETE"],
   },
 });
