@@ -1,77 +1,140 @@
-Environment variables
+# MyChat – Admin Panel
+A lightweight React admin interface for managing the MyChat app. It lets an admin list users, delete a specific user, wipe all users, and clear all messages. Requests are authenticated by sending an admin key in the request header.
 
-Create a .env file in this folder with:
+## Features
 
-REACT_APP_ADMIN_KEY=dev-admin-key
+1. View all registered users
 
-For production, change the value and rebuild the admin panel.
-# Getting Started with Create React App
+2. Delete a single user
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+3. Delete all users
 
-## Available Scripts
+4. Delete all messages
 
-In the project directory, you can run:
+5. Sends x-admin-key with every admin request
 
-### `npm start`
+## Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Frontend: React, Axios
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Backend (required): MyChat API (Node/Express, MongoDB)
 
-### `npm test`
+Auth (admin): Shared header key (x-admin-key)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Folder Structure
+admin-panel/
+<br>
+  ├─ public/
+  <br>
+  ├─ src/
+  <br>
+  │   ├─ components/
+  <br>
+  │   ├─ pages/
+  <br>
+  │   ├─ utils/
+  <br>
+  │   └─ index.js
+  <br>
+  ├─ .env             
+  <br>
+  ├─ package.json
+  <br>
+  └─ README.md
 
-### `npm run build`
+## Prerequisites
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Node.js 18+
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+A running MyChat backend URL (Render/Heroku/Railway/local)
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+An admin key configured on your backend (e.g., ADMIN_KEY)
 
-### `npm run eject`
+## Environment Variables
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Create admin-panel/.env:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Backend base URL – REQUIRED if your code reads from env; 
+### otherwise make sure src/utils/APIRoutes.js points to the correct URL.
+REACT_APP_API_URL=https://your-backend.example.com
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+# Client-side admin key sent as x-admin-key
+# (Match this with your backend’s ADMIN_KEY)
+REACT_APP_ADMIN_KEY=change_this_admin_key
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
-## Learn More
+The panel sends x-admin-key: REACT_APP_ADMIN_KEY on admin routes:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+GET /api/admin/users
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+DELETE /api/admin/delete-user/:userId
 
-### Code Splitting
+DELETE /api/admin/delete-all-users
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+DELETE /api/admin/delete-all-messages
 
-### Analyzing the Bundle Size
+Quick Start (Local)
+cd admin-panel
+npm install
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Development
+npm start
 
-### Making a Progressive Web App
+## Production build
+npm run build
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
 
-### Advanced Configuration
+Dev server: http://localhost:3001 (or the port shown in your terminal)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+Ensure the backend is reachable from your browser and CORS is set up correctly on the API.
 
-### Deployment
+## Deployment
+Vercel / Netlify (Static)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Build command: npm run build
 
-### `npm run build` fails to minify
+Publish/Output directory: build
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Environment variables:
+
+REACT_APP_API_URL
+
+REACT_APP_ADMIN_KEY
+
+SPA routing (if you use client-side routes):
+
+Vercel: add vercel.json at admin-panel/ if needed:
+
+{
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
+
+
+Netlify: add _redirects with /* /index.html 200
+
+
+## Security Notes
+
+A static admin key in frontend code can be extracted by anyone with access to the panel. For production, prefer:
+
+Putting admin endpoints behind a server-side proxy that adds the header,
+
+Or using proper admin authentication (JWT/role-based) instead of a shared key.
+
+Always use HTTPS URLs for the backend in production.
+
+## Common Issues & Fixes
+
+401/403 on admin routes: Admin key mismatch → check REACT_APP_ADMIN_KEY vs backend ADMIN_KEY.
+
+CORS errors: Enable CORS for the admin origin in your backend.
+
+Calls going to localhost in production: Ensure REACT_APP_API_URL is set in the deploy provider’s environment settings and rebuild.
+
+## Scripts
+"scripts": {
+  "start": "react-scripts start",
+  "build": "react-scripts build",
+  "test": "react-scripts test",
+  "eject": "react-scripts eject"
+}
