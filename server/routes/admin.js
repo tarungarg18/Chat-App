@@ -1,5 +1,36 @@
 const router = require("express").Router();
 
+// Special setup endpoint that doesn't require admin key verification
+router.post("/setup", async (req, res) => {
+  try {
+    const { adminKey } = req.body;
+    
+    if (!adminKey || adminKey.length < 8) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Admin key must be at least 8 characters long" 
+      });
+    }
+
+    // Set the admin key in environment (this will persist for the session)
+    process.env.ADMIN_KEY = adminKey;
+    
+    console.log("✅ Default admin key set:", adminKey);
+    
+    res.json({ 
+      success: true, 
+      message: "Default admin key created successfully",
+      adminKey: adminKey 
+    });
+  } catch (err) {
+    console.error("Setup error:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: err.message 
+    });
+  }
+});
+
 function verifyAdminKey(req, res, next) {
   const configuredKey = process.env.ADMIN_KEY || "dev-admin-key";
   const providedKey = req.header("x-admin-key");
