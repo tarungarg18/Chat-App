@@ -49,6 +49,13 @@ app.get("/ping", (_req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
+// Error handler to return JSON messages
+app.use((err, _req, res, _next) => {
+  console.error("Unhandled error:", err);
+  const message = err?.message || "Internal Server Error";
+  res.status(500).json({ status: false, msg: message });
+});
+
 const server = app.listen(PORT, () =>
   console.log(`Server started on ${PORT}`)
 );

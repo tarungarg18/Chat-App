@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-<<<<<<< HEAD
-const BACKEND_URL = process.env.REACT_APP_API_URL || "https://chat-app-1-tpn3.onrender.com";
-const API = `${BACKEND_URL}/api/admin`;
-=======
+
 const API = "https://chat-app-1-tpn3.onrender.com";
->>>>>>> 29ca523ef8f3f46b71bf22545cd0548b8bef8f20
 const ADMIN_KEY = process.env.REACT_APP_ADMIN_KEY || "dev-admin-key";
 
 function App() {

@@ -78,7 +78,8 @@ export default function Register() {
           navigate("/");
         }
       } catch (error) {
-        toast.error("Registration failed. Please try again.", toastOptions);
+        const serverMsg = error?.response?.data?.msg;
+        toast.error(serverMsg || "Registration failed. Please try again.", toastOptions);
       } finally {
         setLoading(false);
       }
