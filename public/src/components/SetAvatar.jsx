@@ -30,7 +30,6 @@ export default function SetAvatar() {
   const generateRandomName = () =>
     Math.random().toString(36).substring(2, 10);
 
-  // Generate 12 avatars
   useEffect(() => {
     const generateAvatars = () => {
       const data = [];

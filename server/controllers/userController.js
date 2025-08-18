@@ -1,10 +1,5 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
-// OTP and Google auth removed; keeping simple local auth only
-
-// Email OTP removed
-
-// Login user
 module.exports.login = async (req, res, next) => {
   try {
     const { username, password } = req.body;
@@ -12,15 +7,6 @@ module.exports.login = async (req, res, next) => {
     if (!user)
       return res.json({ msg: "Incorrect Username or Password", status: false });
 
-    // Commented out Google OAuth check for now
-    /*
-    // Check if user is a Google OAuth user (no password required)
-    if (user.authMethod === 'google') {
-      return res.json({ msg: "This account was created with Google. Please use Google login.", status: false });
-    }
-    */
-
-    // For local users, verify password
     if (!user.password) {
       return res.json({ msg: "Incorrect Username or Password", status: false });
     }
@@ -29,13 +15,6 @@ module.exports.login = async (req, res, next) => {
     if (!isPasswordValid)
       return res.json({ msg: "Incorrect Username or Password", status: false });
 
-    // Commented out email verification check for now
-    /*
-    // Check if email is verified for local users
-    if (user.authMethod === 'local' && !user.isEmailVerified) {
-      return res.json({ msg: "Please verify your email before logging in", status: false });
-    }
-    */
 
     delete user.password;
     return res.json({ status: true, user });
@@ -44,7 +23,6 @@ module.exports.login = async (req, res, next) => {
   }
 };
 
-// Register user
 module.exports.register = async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
@@ -72,7 +50,6 @@ module.exports.register = async (req, res, next) => {
   }
 };
 
-// Get all users except current
 module.exports.getAllUsers = async (req, res, next) => {
   try {
     const users = await User.find({ _id: { $ne: req.params.id } }).select([
@@ -87,7 +64,6 @@ module.exports.getAllUsers = async (req, res, next) => {
   }
 };
 
-// Set avatar
 module.exports.setAvatar = async (req, res, next) => {
   try {
     const userId = req.params.id;
@@ -109,7 +85,6 @@ module.exports.setAvatar = async (req, res, next) => {
   }
 };
 
-// Logout
 module.exports.logOut = (req, res, next) => {
   try {
     if (!req.params.id) return res.json({ msg: "User id is required " });
@@ -120,7 +95,6 @@ module.exports.logOut = (req, res, next) => {
   }
 };
 
-// Delete account
 module.exports.deleteAccount = async (req, res, next) => {
   try {
     const userId = req.params.id;

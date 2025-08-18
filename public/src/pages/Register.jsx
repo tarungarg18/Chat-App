@@ -35,7 +35,6 @@ export default function Register() {
     setValues({ ...values, [event.target.name]: event.target.value });
   };
 
-  // OTP flow removed; simple registration only
 
   const handleValidation = () => {
     const { password, confirmPassword, username, email } = values;
@@ -55,7 +54,6 @@ export default function Register() {
     return true;
   };
 
-  // OTP removed
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -122,7 +120,6 @@ export default function Register() {
             name="confirmPassword"
             onChange={(e) => handleChange(e)}
           />
-          {/* OTP removed */}
           <button type="submit" disabled={loading}>
             {loading ? "Creating Account..." : "Create Account"}
           </button>
@@ -137,7 +134,6 @@ export default function Register() {
   );
 }
 
-// glowing effect like in login
 const glow = keyframes`
   0% { box-shadow: 0 0 5px #4e0eff, 0 0 10px #4e0eff; }
   50% { box-shadow: 0 0 20px #4e0eff, 0 0 30px #4e0eff; }

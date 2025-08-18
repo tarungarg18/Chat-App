@@ -17,7 +17,6 @@ export default function Chat() {
   const [currentChat, setCurrentChat] = useState(undefined);
   const [currentUser, setCurrentUser] = useState(undefined);
 
-  // Fetch current user
   useEffect(() => {
     const fetchUser = async () => {
       const storedUser = localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY);
@@ -30,13 +29,11 @@ export default function Chat() {
     fetchUser();
   }, [navigate]);
 
-  // Initialize socket connection
   useEffect(() => {
     if (currentUser) {
       socket.current = io(host);
       socket.current.emit("add-user", currentUser._id);
 
-      // Listen for force logout events (when user is deleted by admin)
       socket.current.on("forceLogout", (data) => {
         const reason = data?.reason || "You have been logged out";
         alert(`🚨 ${reason}`);
@@ -44,23 +41,17 @@ export default function Chat() {
         navigate("/login");
       });
 
-      // Admin broadcast: a user was deleted
       socket.current.on("userDeleted", ({ userId }) => {
-        // If current chat is the deleted user, close it
         setContacts((prev) => prev.filter((u) => u._id !== userId));
         setCurrentChat((prev) => (prev && prev._id === userId ? undefined : prev));
       });
 
-      // Admin broadcast: all users deleted
       socket.current.on("usersDeleted", () => {
         setContacts([]);
         setCurrentChat(undefined);
-        // If desired, force logout handled by backend for online users
       });
 
-      // Admin broadcast: messages cleared
       socket.current.on("messagesCleared", () => {
-        // No need to logout; just force refresh of current chat container by resetting it
         setCurrentChat((prev) => (prev ? { ...prev } : prev));
       });
 
@@ -70,7 +61,6 @@ export default function Chat() {
     }
   }, [currentUser, navigate]);
 
-  // Fetch contacts
   useEffect(() => {
     const fetchContacts = async () => {
       if (currentUser) {

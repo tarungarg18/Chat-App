@@ -89,7 +89,6 @@ export default function Login() {
   );
 }
 
-// glowing animation
 const glow = keyframes`
   0% { box-shadow: 0 0 5px #4e0eff, 0 0 10px #4e0eff; }
   50% { box-shadow: 0 0 20px #4e0eff, 0 0 30px #4e0eff; }

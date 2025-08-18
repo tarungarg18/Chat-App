@@ -10,7 +10,6 @@ export default function ChatContainer({ currentChat, socket }) {
   const scrollRef = useRef();
   const [arrivalMessage, setArrivalMessage] = useState(null);
 
-  // Fetch messages when currentChat changes
   useEffect(() => {
     const fetchMessages = async () => {
       if (!currentChat) return;
@@ -22,7 +21,6 @@ export default function ChatContainer({ currentChat, socket }) {
         to: currentChat._id,
       });
 
-      // Add timestamp for existing messages
       const messagesWithTime = response.data.map(msg => ({
         ...msg,
         time: new Date(msg.updatedAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -57,11 +55,9 @@ export default function ChatContainer({ currentChat, socket }) {
     setMessages((prev) => [...prev, { fromSelf: true, message: msg, time: formattedTime }]);
   };
 
-  // Ensure sender also updates message list in case ack needed
   useEffect(() => {
     if (!socket.current) return;
     const handleSent = ({ to, msg }) => {
-      // Only append if this chat is still active and the message belongs here
       if (!currentChat || currentChat._id !== to) return;
       const now = new Date();
       const formattedTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -74,7 +70,6 @@ export default function ChatContainer({ currentChat, socket }) {
     };
   }, [socket, currentChat]);
 
-  // Listen for incoming messages
   useEffect(() => {
     if (!socket.current) return;
     const handleReceive = (msg) => {
@@ -82,7 +77,6 @@ export default function ChatContainer({ currentChat, socket }) {
       const formattedTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       setArrivalMessage({ fromSelf: false, message: msg, time: formattedTime });
     };
-    // Ensure only a single listener is active
     socket.current.off("msg-recieve");
     socket.current.on("msg-recieve", handleReceive);
     return () => {
@@ -90,12 +84,11 @@ export default function ChatContainer({ currentChat, socket }) {
     };
   }, [socket, currentChat]);
 
-  // Add arrived message to chat
+
   useEffect(() => {
     if (arrivalMessage) setMessages((prev) => [...prev, arrivalMessage]);
   }, [arrivalMessage]);
 
-  // Scroll to latest message
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -114,7 +107,6 @@ export default function ChatContainer({ currentChat, socket }) {
             <h3>{currentChat.username}</h3>
           </div>
         </div>
-        {/* Removed logout/delete buttons */}
       </div>
 
       <div className="chat-messages">

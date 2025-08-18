@@ -25,7 +25,6 @@ export default function ChatInput({ handleSendMsg }) {
     }
   };
 
-  // Close emoji picker if clicked outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (pickerRef.current && !pickerRef.current.contains(event.target)) {

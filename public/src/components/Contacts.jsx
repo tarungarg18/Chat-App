@@ -20,7 +20,6 @@ export default function Contacts({ contacts, changeChat }) {
     changeChat(contact);
   };
 
-  // Logout button removed from sidebar
 
   return (
     <>
@@ -63,7 +62,6 @@ export default function Contacts({ contacts, changeChat }) {
             <div className="username">
               <h2>{currentUserName}</h2>
             </div>
-            {/* Logout button removed */}
           </div>
         </Container>
       )}
