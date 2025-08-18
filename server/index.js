@@ -69,6 +69,7 @@ const io = socket(server, {
       process.env.FRONTEND_URL
     ].filter(Boolean),
     credentials: true,
+    methods: ["GET", "POST", "DELETE", "PUT", "PATCH", "OPTIONS"],
   },
 });
 
