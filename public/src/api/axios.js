@@ -1,7 +1,8 @@
 import axios from "axios";
+import { host } from "../utils/APIRoutes";
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: `${host}/api`,
 });
 
 api.interceptors.response.use(

@@ -16,6 +16,8 @@ app.use(cors({
   origin: [
     "http://localhost:3000",  
     "http://localhost:3001",  
+    "https://chat-app-frontend-kag8.onrender.com",
+    process.env.ADMIN_FRONTEND_URL,
     process.env.FRONTEND_URL
   ].filter(Boolean),
   credentials: true
@@ -52,7 +54,13 @@ const server = app.listen(PORT, () =>
 );
 const io = socket(server, {
   cors: {
-    origin: ["http://localhost:3000", "http://localhost:3001"],
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "https://chat-app-frontend-kag8.onrender.com",
+      process.env.ADMIN_FRONTEND_URL,
+      process.env.FRONTEND_URL
+    ].filter(Boolean),
     credentials: true,
   },
 });
