@@ -3,7 +3,7 @@ import axios from "axios";
 
 const BACKEND_URL = process.env.REACT_APP_API_URL || "https://chat-app-1-tpn3.onrender.com";
 const API = `${BACKEND_URL}/api/admin`;
-const ADMIN_KEY = process.env.REACT_APP_ADMIN_KEY || "dev-admin-key";
+const ADMIN_KEY = process.env.REACT_APP_ADMIN_KEY || "tarun0809";
 
 function App() {
   const [users, setUsers] = useState([]);
