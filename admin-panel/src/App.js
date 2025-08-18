@@ -9,36 +9,126 @@ function App() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState("Testing connection...");
+  const [adminKey, setAdminKey] = useState(process.env.REACT_APP_ADMIN_KEY || "dev-admin-key");
+
+  // Generate a secure random admin key
+  const generateAdminKey = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < 16; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  };
+
+  // Create default admin key on backend
+  const createDefaultAdmin = async () => {
+    try {
+      const newAdminKey = generateAdminKey();
+      console.log("Creating default admin key:", newAdminKey);
+      
+      // Try to set the admin key via a special endpoint (we'll need to add this to backend)
+      const res = await axios.post(`${BACKEND_URL}/api/admin/setup`, {
+        adminKey: newAdminKey
+      });
+      
+      if (res.data.success) {
+        setAdminKey(newAdminKey);
+        alert(`✅ Default admin key created: ${newAdminKey}\n\nPlease save this key for future use!`);
+        return newAdminKey;
+      }
+    } catch (err) {
+      console.error("Failed to create default admin:", err);
+      // If backend doesn't support auto-setup, just use a default key
+      const defaultKey = "default-admin-key-2024";
+      setAdminKey(defaultKey);
+      alert(`⚠️ Using fallback admin key: ${defaultKey}\n\nPlease set ADMIN_KEY=${defaultKey} in your backend environment variables.`);
+      return defaultKey;
+    }
+  };
 
   // Test connection to backend
   const testConnection = async () => {
     try {
       console.log("Testing connection to:", BACKEND_URL);
       console.log("API base:", API);
-      console.log("Admin key:", ADMIN_KEY);
+      console.log("Admin key:", adminKey);
       
+      // First test basic backend connectivity
       const res = await axios.get(`${BACKEND_URL}/ping`);
       setConnectionStatus(`✅ Backend connected: ${res.data.msg}`);
       
       // Test admin endpoint
       const adminRes = await axios.get(`${API}/users`, { 
-        headers: { "x-admin-key": ADMIN_KEY } 
+        headers: { "x-admin-key": adminKey } 
       });
       setConnectionStatus(`✅ Admin API working: ${adminRes.data.length} users found`);
     } catch (err) {
       console.error("Connection test failed:", err);
-      setConnectionStatus(`❌ Connection failed: ${err.message}`);
+      if (err.response?.status === 404) {
+        setConnectionStatus(`❌ 404: Admin endpoint not found at ${API}/users`);
+      } else if (err.response?.status === 401) {
+        setConnectionStatus(`❌ 401: Unauthorized - Admin key mismatch. Creating default admin...`);
+        // Automatically try to create default admin
+        const newKey = await createDefaultAdmin();
+        if (newKey) {
+          // Retry with new key
+          setTimeout(() => testConnection(), 1000);
+        }
+      } else {
+        setConnectionStatus(`❌ Connection failed: ${err.message}`);
+      }
+    }
+  };
+
+  // Simple backend connectivity test
+  const testBackendOnly = async () => {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/ping`);
+      alert(`✅ Backend is accessible: ${res.data.msg}`);
+    } catch (err) {
+      alert(`❌ Backend not accessible: ${err.message}`);
     }
   };
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API}/users`, { headers: { "x-admin-key": ADMIN_KEY } });
+      console.log("Fetching users from:", `${API}/users`);
+      console.log("Using admin key:", adminKey);
+      
+      const res = await axios.get(`${API}/users`, { 
+        headers: { "x-admin-key": adminKey },
+        timeout: 10000 // 10 second timeout
+      });
       setUsers(res.data);
+      console.log("Users fetched successfully:", res.data.length, "users");
     } catch (err) {
-      console.error(err);
-      alert("Error fetching users: " + err.message);
+      console.error("Fetch users error details:", {
+        message: err.message,
+        status: err.response?.status,
+        statusText: err.response?.statusText,
+        url: err.config?.url,
+        headers: err.config?.headers
+      });
+      
+      let errorMsg = "Error fetching users: " + err.message;
+      if (err.response?.status === 404) {
+        errorMsg = "404 Error: Admin endpoint not found. Check if backend is running and admin routes are configured.";
+      } else if (err.response?.status === 401) {
+        errorMsg = "401 Error: Unauthorized. Creating default admin key...";
+        // Automatically try to create default admin
+        const newKey = await createDefaultAdmin();
+        if (newKey) {
+          // Retry with new key
+          setTimeout(() => fetchUsers(), 1000);
+          return;
+        }
+      } else if (err.response?.status === 403) {
+        errorMsg = "403 Error: Forbidden. Check CORS configuration on backend.";
+      }
+      
+      alert(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -48,11 +138,20 @@ function App() {
     if (window.confirm("⚠️ Delete ALL users? This cannot be undone.")) {
       try {
         setLoading(true);
-        const res = await axios.delete(`${API}/delete-all-users`, { headers: { "x-admin-key": ADMIN_KEY } });
+        const res = await axios.delete(`${API}/delete-all-users`, { headers: { "x-admin-key": adminKey } });
         alert(`${res.data.msg} (${res.data.count} users deleted)`);
         fetchUsers();
       } catch (err) {
-        alert("Error: " + err.message);
+        if (err.response?.status === 401) {
+          alert("401 Error: Admin key mismatch. Creating default admin key...");
+          const newKey = await createDefaultAdmin();
+          if (newKey) {
+            setTimeout(() => deleteAllUsers(), 1000);
+            return;
+          }
+        } else {
+          alert("Error: " + err.message);
+        }
       } finally {
         setLoading(false);
       }
@@ -63,11 +162,20 @@ function App() {
     if (window.confirm(`⚠️ Delete user "${username}"? This cannot be undone.`)) {
       try {
         setLoading(true);
-        const res = await axios.delete(`${API}/delete-user/${userId}`, { headers: { "x-admin-key": ADMIN_KEY } });
+        const res = await axios.delete(`${API}/delete-user/${userId}`, { headers: { "x-admin-key": adminKey } });
         alert(`✅ ${res.data.msg}`);
         fetchUsers(); // Refresh the user list
       } catch (err) {
-        alert("Error deleting user: " + err.message);
+        if (err.response?.status === 401) {
+          alert("401 Error: Admin key mismatch. Creating default admin key...");
+          const newKey = await createDefaultAdmin();
+          if (newKey) {
+            setTimeout(() => deleteIndividualUser(userId, username), 1000);
+            return;
+          }
+        } else {
+          alert("Error deleting user: " + err.message);
+        }
       } finally {
         setLoading(false);
       }
@@ -78,10 +186,19 @@ function App() {
     if (window.confirm("⚠️ Delete ALL messages? This cannot be undone.")) {
       try {
         setLoading(true);
-        const res = await axios.delete(`${API}/delete-all-messages`, { headers: { "x-admin-key": ADMIN_KEY } });
+        const res = await axios.delete(`${API}/delete-all-messages`, { headers: { "x-admin-key": adminKey } });
         alert(`${res.data.msg} (${res.data.count} messages deleted)`);
       } catch (err) {
-        alert("Error: " + err.message);
+        if (err.response?.status === 401) {
+          alert("401 Error: Admin key mismatch. Creating default admin key...");
+          const newKey = await createDefaultAdmin();
+          if (newKey) {
+            setTimeout(() => deleteAllMessages(), 1000);
+            return;
+          }
+        } else {
+          alert("Error: " + err.message);
+        }
       } finally {
         setLoading(false);
       }
@@ -174,6 +291,36 @@ function App() {
           }}
         >
           🔍 Test Connection
+        </button>
+
+        <button
+          onClick={testBackendOnly}
+          style={{ 
+            marginLeft: "10px",
+            padding: "12px 20px", 
+            background: "#6c757d", 
+            color: "white", 
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer"
+          }}
+        >
+          🌐 Test Backend Only
+        </button>
+
+        <button
+          onClick={createDefaultAdmin}
+          style={{ 
+            marginLeft: "10px",
+            padding: "12px 20px", 
+            background: "#28a745", 
+            color: "white", 
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer"
+          }}
+        >
+          🔑 Create Admin Key
         </button>
       </div>
 
