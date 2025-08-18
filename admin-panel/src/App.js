@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 const API = "http://localhost:5000/api/admin";
-// Default to the dev key so it works out-of-the-box; override via REACT_APP_ADMIN_KEY in .env
 const ADMIN_KEY = process.env.REACT_APP_ADMIN_KEY || "dev-admin-key";
 
 function App() {
