@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const BACKEND_URL = process.env.REACT_APP_API_URL || "https://chat-app-1-tpn3.onrender.com";
+const RAW_BACKEND_URL = process.env.REACT_APP_API_URL || "https://chat-app-1-tpn3.onrender.com";
+const BACKEND_URL = RAW_BACKEND_URL.replace(/\/+$/, "");
 const API = `${BACKEND_URL}/api/admin`;
 const ADMIN_KEY = "tarungarg0809";
 const ADMIN_AUTH_FLAG = "ADMIN_AUTH_OK"; // stored in sessionStorage; scoped to the tab
@@ -39,8 +40,13 @@ function App() {
       setUsers(res.data);
       console.log("Users fetched successfully:", res.data.length, "users");
     } catch (err) {
-      console.error("Fetch users error:", err);
-      alert("Error fetching users: " + err.message);
+      const status = err?.response?.status;
+      const data = err?.response?.data;
+      console.error("Fetch users error:", { status, data, err });
+      alert(
+        `Error fetching users${status ? ` (HTTP ${status})` : ""}: ` +
+        (data?.error || data?.msg || err.message)
+      );
     } finally {
       setLoading(false);
     }
