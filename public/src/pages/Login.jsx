@@ -96,7 +96,7 @@ const glow = keyframes`
 `;
 
 const FormContainer = styled.div`
-  height: 100vh;
+  min-height: 100vh;
   width: 100vw;
   display: flex;
   flex-direction: column;
@@ -104,6 +104,8 @@ const FormContainer = styled.div`
   gap: 1rem;
   align-items: center;
   background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  overflow-y: auto;
+  padding: 2rem 1rem;
 
   .brand {
     display: flex;
@@ -136,7 +138,7 @@ const FormContainer = styled.div`
     gap: 1.5rem;
     background-color: rgba(0, 0, 0, 0.6);
     border-radius: 2rem;
-    padding: 3rem 4rem;
+    padding: 3rem 2rem;
     box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
     transition: transform 0.3s ease;
     &:hover {

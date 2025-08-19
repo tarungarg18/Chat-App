@@ -15,7 +15,7 @@ input {
 body {
   max-height: 100vh;
   max-width: 100vw;
-  overflow: hidden;
+  overflow: auto; /* allow scrolling on mobile so hidden buttons/links are reachable */
 }
 
 .Toastify__toast-theme--dark {
