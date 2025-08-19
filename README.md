@@ -1,175 +1,105 @@
 # 💬 MyChat
+Full-stack real-time chat app built with Node.js, Express, MongoDB, Socket.io, and React.
+Supports email/password auth, avatars, one-to-one messaging, and an Admin Panel.
 
-A full-stack real-time chat application built with Node.js, Express, MongoDB, Socket.io, and React.
-It supports simple email/password auth, avatars, instant one-to-one messaging, and admin panel for user management.
+# Live Demo:
 
-## 🚀 Features
+Frontend: https://chat-app-frontend-kag8.onrender.com
 
-🔐 **User Authentication** – Register, login, and delete accounts
+Admin Panel: https://admin-panel-67kf.onrender.com/
 
-🖼 **Profile Avatar** – Personalize your profile with custom avatars
+# 🚀 Features
 
-👥 **User Management** – See all registered users except yourself
+### 🔐 Auth: Register, login, delete accounts
 
-💬 **Real-time Messaging** – Powered by Socket.io for instant communication
+### 🖼 Avatars: Personalize profiles
 
-📦 **Persistent Storage** – Messages and user data saved in MongoDB
+### 💬 Real-time Messaging: Powered by Socket.io. Refresh chat to get new messages
 
-📡 **RESTful API** – For authentication and messaging
+### 👥 User Management: View all users
 
-⚙️ **Admin Panel** – Delete individual users or all users, manage messages
+### ⚙️ Admin Panel: Manage users/messages, force logout
 
-🔒 **Force Logout** – Automatic logout when users are deleted by admin
+### 📦 Persistence: Data stored in MongoDB
 
-## 🛠 Tech Stack
+# 🛠 Tech Stack
 
-**Frontend:** React.js, Axios, Styled Components
+Frontend: React.js, Axios, Styled Components
+Backend: Node.js, Express.js, Socket.io
+Database: MongoDB + Mongoose
+Other: dotenv, nodemon, cors
 
-**Backend:** Node.js, Express.js, Socket.io
-
-**Database:** MongoDB + Mongoose
-
-**Authentication:** Simple local (email/password)
-
-**Other:** dotenv, nodemon, cors
-
-## 📂 Project Structure
-```
+# 📂 Project Structure
 Chat-App/
-├── server/               # Backend server
-│   ├── config/          # (removed) Google OAuth configuration
-│   ├── controllers/     # Business logic
-│   ├── models/          # Mongoose models (User, Message)
-│   ├── routes/          # Auth, Message & Admin routes
-│   ├── services/        # (removed) Email service for OTP
-│   └── index.js         # Backend entry point
-├── public/              # Main chat app frontend
-│   └── src/
-│       ├── components/  # React components
-│       ├── pages/       # Main pages (Login, Chat, etc.)
-│       ├── assets/      # Images and static files
-│       └── utils/       # API routes and utilities
-├── admin-panel/         # Admin panel frontend
-│   └── src/             # React admin interface
+<br>
+├── server/          # Backend
+<br>
+├── public/          # Chat app frontend
+<br>
+├── admin-panel/     # Admin frontend
+<br>
 └── README.md
-```
 
-## ⚙️ Installation & Setup
+# ⚙️ Setup
+### 1. Clone & Backend
+  git clone https://github.com/tarungarg18/Chat-App.git
+  cd Chat-App/server
 
-### 1. Clone the repository
-```bash
-git clone https://github.com/tarungarg18/Chat-App.git
-cd Chat-App
-```
+  npm install
 
-### 2. Setup Backend
-```bash
-cd server
-npm install
-```
+  .env example:
+  PORT=5000
+  MONGO_URL=mongodb://127.0.0.1:27017/chatapp
+  ADMIN_KEY=your_admin_key
 
-Create a `.env` file inside `server/`:
-```env
-PORT=5000
-MONGO_URL=mongodb://127.0.0.1:27017/chatapp
-ADMIN_KEY=change_this_admin_key
-```
+  npm run dev   # development
 
-Start the backend:
-```bash
-# for development with reload
-npm run dev
+  npm start     # production
 
-# for production
-npm start
-```
-
-Server will run at: `http://localhost:5000`
-
-### 3. Setup Main Chat App
-```bash
+### 2. Frontend
 cd ../public
 npm install
 npm start
-```
 
-Frontend will run at: `http://localhost:3000`
-To point to a hosted API, set an env var before build:
-```env
-REACT_APP_API_URL=https://your-api.example.com
-```
-
-### 4. Setup Admin Panel
-```bash
+### 3. Admin Panel
 cd ../admin-panel
 npm install
 npm start
-```
 
-Admin panel will run at: `http://localhost:3001`
+# 🔗 API Overview
 
-Create an `.env` file inside `admin-panel/`:
-```env
-REACT_APP_ADMIN_KEY=dev-admin-key
-```
-Use a stronger secret for production, and rebuild the admin panel after changes.
+Auth: /api/auth/*
 
-## 🔗 API Endpoints
+Messaging: /api/messages/*
 
-### Authentication
-- `POST /api/auth/register` → Register a new user
-- `POST /api/auth/login` → Login
-- `POST /api/auth/send-verification` → Send email verification OTP
-- `POST /api/auth/verify-otp` → Verify email OTP
-- `POST /api/auth/setavatar/:id` → Set avatar
-- `DELETE /api/auth/delete/:id` → Delete user
+Admin: /api/admin/* (requires x-admin-key)
 
-### Messaging
-- `POST /api/messages/addmsg` → Send message
-- `POST /api/messages/getmsg` → Fetch messages
+Socket.io Events: add-user, send-msg, msg-recieve, forceLogout
 
-### Admin (Protected with x-admin-key header)
-- `GET /api/admin/users` → Get all users
-- `DELETE /api/admin/delete-user/:userId` → Delete specific user
-- `DELETE /api/admin/delete-all-users` → Delete all users
-- `DELETE /api/admin/delete-all-messages` → Delete all messages
+#### Tip: Refresh chat to see new messages.
 
-### Utility
-- `GET /ping` → Quick health check
+# 📸 Screenshots
+### 1. Login:
+<img width="645" height="640" alt="image" src="https://github.com/user-attachments/assets/437e9841-7faf-4aad-8713-0ee5affca8cb" />
 
-## 📡 Socket.io Events
+### 2. Register:
+<img width="589" height="801" alt="image" src="https://github.com/user-attachments/assets/0fa19225-6a12-403d-8cc8-c1eb24b03b74" />
 
-- `add-user` – Register user as online
-- `send-msg` – Send message to another user
-- `msg-recieve` – Receive message from another user
-- `forceLogout` – Force logout user (admin action)
+### 3. Avatar Selection:
+<img width="1891" height="656" alt="image" src="https://github.com/user-attachments/assets/e187f1b4-ec95-40a4-939b-5a9b7f2f05f0" />
 
-## 🔐 Authentication Features
+### 4. User Interface:
+<img width="1905" height="895" alt="image" src="https://github.com/user-attachments/assets/7e42fe44-5c46-441d-b965-dfdbdb2f000b" />
 
-- Simple local auth (email/password)
-- Automatic force logout when users are deleted
+### 5. Admin Panel:
+<img width="1680" height="504" alt="image" src="https://github.com/user-attachments/assets/9eb2ac3c-91f2-4092-8bfc-d4c42fc769c3" />
 
-## 🧩 Development Tools
 
-- **Nodemon** for auto-restart
-- **MongoDB Compass** for DB management
-- **Postman** for API testing
 
-## 🔮 Future Improvements
 
-- Group chats
-- Online/offline indicators
-- File & image sharing
-- Push notifications
-- Deployment on Render/Heroku + Netlify/Vercel
 
-## 📸 Screenshots
 
-![Login](images/login.png)
-![Register](images/register.png)
-![Chat](images/chat.png)
-![Admin](images/admin.png)
 
-## 📝 License
 
-MIT
+
+
