@@ -10,7 +10,6 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware - Allow all origins for admin panel access
 app.use(cors({
   origin: "*",
   credentials: false,
@@ -18,12 +17,10 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Routes
 app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
-// DB Connection
 const MONGO_URL = process.env.MONGO_URL;
 if (!MONGO_URL) {
   console.error("❌ MONGO_URL not set in environment variables!");
@@ -36,16 +33,13 @@ mongoose.connect(MONGO_URL, {
 .then(() => console.log("✅ DB Connection Successful"))
 .catch((err) => console.error("❌ DB Connection Error:", err.message));
 
-// Health check
 app.get("/ping", (_req, res) => res.json({ msg: "Ping Successful" }));
 
-// Error handler
 app.use((err, _req, res, _next) => {
   console.error("Unhandled error:", err);
   res.status(500).json({ status: false, msg: err.message || "Internal Server Error" });
 });
 
-// 404 handler for undefined routes
 app.use("*", (req, res) => {
   res.status(404).json({ 
     error: "Route not found", 
@@ -60,7 +54,6 @@ app.use("*", (req, res) => {
   });
 });
 
-// Server + Socket.io
 const server = app.listen(PORT, () =>
   console.log(`🚀 Server running on port ${PORT}`)
 );
@@ -74,7 +67,6 @@ const io = socket(server, {
 });
 app.set("io", io);
 
-// Socket.io handlers
 global.onlineUsers = new Map();
 io.on("connection", (socket) => {
   global.chatSocket = socket;

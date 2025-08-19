@@ -2,12 +2,10 @@ const router = require("express").Router();
 const User = require("../models/userModel");
 const Message = require("../models/messageModel");
 
-// Test endpoint to verify admin routes are accessible
 router.get("/", (req, res) => {
   res.json({ message: "Admin routes are working!", status: "success" });
 });
 
-// GET /api/admin/users - Get all users
 router.get("/users", async (req, res) => {
   try {
     const users = await User.find({}, { password: 0 }); 
@@ -17,7 +15,6 @@ router.get("/users", async (req, res) => {
   }
 });
 
-// DELETE /api/admin/delete-all-users - Delete all users
 router.delete("/delete-all-users", async (req, res) => {
   try {
     const result = await User.deleteMany({});
@@ -40,7 +37,6 @@ router.delete("/delete-all-users", async (req, res) => {
   }
 });
 
-// DELETE /api/admin/delete-user/:userId - Delete specific user
 router.delete("/delete-user/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
@@ -85,7 +81,6 @@ router.delete("/delete-user/:userId", async (req, res) => {
   }
 });
 
-// DELETE /api/admin/delete-all-messages - Delete all messages
 router.delete("/delete-all-messages", async (req, res) => {
   try {
     const result = await Message.deleteMany({});

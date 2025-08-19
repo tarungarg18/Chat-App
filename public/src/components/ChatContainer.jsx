@@ -31,7 +31,6 @@ export default function ChatContainer({ currentChat, socket }) {
     fetchMessages();
   }, [currentChat]);
 
-  // Handle sending message
   const handleSendMsg = async (msg) => {
     const data = JSON.parse(
       localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)

@@ -5,7 +5,7 @@ const RAW_BACKEND_URL = process.env.REACT_APP_API_URL || "https://chat-app-1-tpn
 const BACKEND_URL = RAW_BACKEND_URL.replace(/\/+$/, "");
 const API = `${BACKEND_URL}/api/admin`;
 const ADMIN_KEY = "tarungarg0809";
-const ADMIN_AUTH_FLAG = "ADMIN_AUTH_OK"; // stored in sessionStorage; scoped to the tab
+const ADMIN_AUTH_FLAG = "ADMIN_AUTH_OK";
 
 function App() {
   const [users, setUsers] = useState([]);
