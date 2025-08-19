@@ -45,6 +45,21 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ status: false, msg: err.message || "Internal Server Error" });
 });
 
+// 404 handler for undefined routes
+app.use("*", (req, res) => {
+  res.status(404).json({ 
+    error: "Route not found", 
+    method: req.method, 
+    url: req.originalUrl,
+    availableRoutes: [
+      "/ping",
+      "/api/admin/*",
+      "/api/auth/*", 
+      "/api/messages/*"
+    ]
+  });
+});
+
 // Server + Socket.io
 const server = app.listen(PORT, () =>
   console.log(`🚀 Server running on port ${PORT}`)

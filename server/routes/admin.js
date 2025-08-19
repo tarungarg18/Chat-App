@@ -2,6 +2,11 @@ const router = require("express").Router();
 const User = require("../models/userModel");
 const Message = require("../models/messageModel");
 
+// Test endpoint to verify admin routes are accessible
+router.get("/", (req, res) => {
+  res.json({ message: "Admin routes are working!", status: "success" });
+});
+
 // GET /api/admin/users - Get all users
 router.get("/users", async (req, res) => {
   try {
